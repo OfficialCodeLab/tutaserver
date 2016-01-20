@@ -445,89 +445,105 @@ var closestDriversHandler = function(cfg, req, res){
             dbs["Users"].find({
                 "_id": drivers[i]._id
             }, function(error, result) {
-
+				
+				try{
                 //If there is a driver
-                if (result && result[0] !== undefined) {
+					if (result && result[0] !== undefined) {
 
-                    var driverIsAvailable = false;
+						var driverIsAvailable = true;
 
-                    //Check the status of the driver
-                    if (result[0].status === "OnDuty") {
-                        //Calculate the time between now and the last time the server was updated by this user
-                        var timeInactive = (Date.now() / 1000) - (result[0].lastModified / 1000);
-                        if (timeInactive < 300) { //If less than 5 mins
-                            driverIsAvailable = true;
-                        }
-                    }
+						//Check the status of the driver
+						/*
+						if (result[0].status === "OnDuty") {
+							//Calculate the time between now and the last time the server was updated by this user
+							var timeInactive = (Date.now() / 1000) - (result[0].lastModified / 1000);
+							if (timeInactive < 300) { //If less than 5 mins
+								driverIsAvailable = true;
+							}
+						}*/
 
-                    if (driverIsAvailable) {
+						if (driverIsAvailable) {
 
-                        /* Search for rejected booking in driver list */
-                        var user = null;
-                        user = result;
-                            
-                        //Calculate distance now since driver is available
-                        if (user !== null && userId !== null) {
-                            var dist = distance(currentUser.location.lat, currentUser.location.lng, user[0].location.lat, user[0].location.lng);
-                            var driverItem = {
-                                id: user[0]._id,
-                                distance: dist,
-                                location: {
-                                    lat: user[0].location.lat,
-                                    lng: user[0].location.lng
-                                }
-                            };
+							/* Search for rejected booking in driver list */
+							var user = null;
+							user = result;
+								
+							//Calculate distance now since driver is available
+							if (user !== null) {
+								var dist = distance(currentUser.location.lat, currentUser.location.lng, user[0].location.lat, user[0].location.lng);
+								var driverItem = {
+									id: user[0]._id,
+									distance: dist,
+									location: {
+										lat: user[0].location.lat,
+										lng: user[0].location.lng
+									}
+								};
 
-                            //Sort the item into the array of ordered drivers (5 max)
-                            if (driversOrdered.length === 0)
-                                driversOrdered.push(driverItem);
-                            else {
-                                var temp = [];
+								//Sort the item into the array of ordered drivers (5 max)
+								if (driversOrdered.length === 0){
+									driversOrdered.push(driverItem);
+									if(orderCount++ === drivers.length-1)
+									   updateClosestDrivers(cfg, req, res, driversOrdered);
+								}
+								else {
+									var temp = [];
 
-                                var tempItem;
-                                var isGreater = false;
-                                while (!isGreater) {
-                                    if (driversOrdered.length > 0) {
-                                        //Pop the drivers into a temp array until insertion of the new driver
-                                        tempItem = driversOrdered.pop();
-                                        if (tempItem.distance < driverItem.distance) {
-                                            //Insert the new driver into the array
-                                            isGreater = true;
-                                            driversOrdered.push(tempItem);
-                                        } else
-                                            temp.push(tempItem);
+									var tempItem;
+									var isGreater = false;
+									while (!isGreater) {
+										if (driversOrdered.length > 0) {
+											//Pop the drivers into a temp array until insertion of the new driver
+											tempItem = driversOrdered.pop();
+											if (tempItem.distance < driverItem.distance) {
+												//Insert the new driver into the array
+												isGreater = true;
+												driversOrdered.push(tempItem);
+											} else
+												temp.push(tempItem);
 
-                                    } else {
-                                        isGreater = true;
-                                    }
-                                }
-                                driversOrdered.push(driverItem);
+										} else {
+											isGreater = true;
+										}
+									}
+									driversOrdered.push(driverItem);
 
-                                //After insertion, re-add the other ordered drivers
-                                for (var y = 0; y < temp.length; y++) {
-                                    driversOrdered.push(temp.pop());
-                                }
+									//After insertion, re-add the other ordered drivers
+									for (var y = 0; y < temp.length; y++) {
+										driversOrdered.push(temp.pop());
+									}
 
-                                //Remove drivers until the array has a max length of 5
-                                while (driversOrdered.length > 5) {
-                                    driversOrdered.pop();
-                                }
+									//Remove drivers until the array has a max length of 5
+									while (driversOrdered.length > 5) {
+										driversOrdered.pop();
+									}
 
-                                if(orderCount++ === drivers.length-1)
-                                   updateClosestDrivers(cfg, req, res, driversOrdered);
-                            }
-                        }
-                        else{ //driver is null
-                        	//console.log(driversOrdered);
-                            if(orderCount++ === drivers.length-1)
-                               updateClosestDrivers(cfg, req, res, driversOrdered);
-                        }	 
-                    } else { //unavailable driver
-                        if(orderCount++ === drivers.length-1)
-                           updateClosestDrivers(cfg, req, res, driversOrdered);
-                        
-                    }
-                }
+									if(orderCount++ === drivers.length-1)
+									   updateClosestDrivers(cfg, req, res, driversOrdered);
+								   
+								}
+							}
+							else{ //driver is null
+								//console.log(driversOrdered);
+								if(orderCount++ === drivers.length-1)
+								   updateClosestDrivers(cfg, req, res, driversOrdered);
+							   
+							}	 
+						} else { //unavailable driver
+							if(orderCount++ === drivers.length-1)
+							   updateClosestDrivers(cfg, req, res, driversOrdered); 
+						   
+						}
+					}
+					else {
+						if(orderCount++ === drivers.length-1)
+						   updateClosestDrivers(cfg, req, res, driversOrdered);
+					}
+				
+					
+				}catch(ex){
+					//console.log("err");
+				}
             });
         }
     });
@@ -569,7 +585,6 @@ var autoAssignDriver = function(data) {
 								dbs["Bookings"].find({_id: bookingId}, function(err, res){
 									if(res[0].status === "Unconfirmed")
 									{
-										console.log("Booking has been assigned");
 										getClosestDriver(data, function(closestDriver, id) {
 											assignNewDriver(closestDriver, id);
 											autoRejectBooking(id, closestDriver, 40*1000);
@@ -979,6 +994,7 @@ var updateBooking = function(cfg, req, res, newstatus) {
 var updateClosestDrivers = function(cfg, req, res, newdrivers) {
     var id = req.query._id == undefined ? req.params.id : req.query._id;
 
+	//console.log(newdrivers);
     dbs[req.params.collection].find({
         "_id": id
     }, function(err, result) {
@@ -1982,8 +1998,8 @@ dbs["Users"].insert({
     "password": "1",
     "userType": "private",
     "location": {
-        "lat": "-26.076",
-        "lng": "28.0008"
+        "lat": "-34.0836",
+        "lng": "18.8413"
     },
     "lastModified": Date.now()
 });
