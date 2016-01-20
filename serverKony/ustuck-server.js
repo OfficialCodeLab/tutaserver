@@ -535,10 +535,18 @@ var closestDriversHandler = function(cfg, req, res){
 
 
 var autoAssignDriver = function(data) {
-    getClosestDriver(data, function(closestDriver, id) {
-        assignNewDriver(closestDriver, id);
-		autoRejectBooking(id, closestDriver, 40*1000);
-    });
+    dbs["Bookings"].find({_id: data._id}, fucntion(error, success){
+        if(success[0].time !== undefined){
+            getClosestDriver(data, function(closestDriver, id) {
+                assignNewDriver(closestDriver, id);
+                autoRejectBooking(id, closestDriver, 40*1000);
+            });
+        } else {
+            var timeout = Date.now() - Date.parse(success[0].time);
+            console.log(timeout);
+        }
+    })
+    
     return data;
 }
 
