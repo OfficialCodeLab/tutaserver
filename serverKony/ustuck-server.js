@@ -432,6 +432,7 @@ var closestDriversHandler = function(cfg, req, res){
 	var drivers;
     var driversOrdered = [];
     var currentUser;
+    var orderCount = 0;
     dbs["Users"].find({
         "_id": id
     }, function(err, res) {
@@ -511,15 +512,20 @@ var closestDriversHandler = function(cfg, req, res){
                                 while (driversOrdered.length > 5) {
                                     driversOrdered.pop();
                                 }
+
+                                if(orderCount++ === drivers.length-1)
+                                   updateClosestDrivers(cfg, req, res, driversOrdered);
                             }
                         }
-                        else{
-                        	console.log(driversOrdered);
-                        	
-                        	updateClosestDrivers(cfg, req, res, driversOrdered);
+                        else{ //driver is null
+                        	//console.log(driversOrdered);
+                            if(orderCount++ === drivers.length-1)
+                               updateClosestDrivers(cfg, req, res, driversOrdered);
                         }	 
-                    } else {
-                        //Do nothing (unavailable drivers)
+                    } else { //unavailable driver
+                        if(orderCount++ === drivers.length-1)
+                           updateClosestDrivers(cfg, req, res, driversOrdered);
+                        
                     }
                 }
             });
