@@ -415,7 +415,7 @@ var notificationHandler = function(cfg, req, res) {
 
 }
 
-var closestDriversHandler = function(cfg, req, res){
+var closestDriversHandler = function(cfg, req, res, lat, lng){
 	var id = req.query._id == undefined ? req.params.id : req.query._id;
 
     dbs[req.params.collection].find({
@@ -423,7 +423,7 @@ var closestDriversHandler = function(cfg, req, res){
         	if(res.length > 0){
 
         	} else {
-                console.log("User not found, added");
+                //console.log("User not found, added");
                 dbs[req.params.collection].insert({
                     "_id": id
                 });
@@ -431,13 +431,17 @@ var closestDriversHandler = function(cfg, req, res){
     });	
 	var drivers;
     var driversOrdered = [];
-    var currentUser;
+    var currentUser = {
+		_id : id,
+		location : {
+			lat : req.query.lat,
+			lng : req.query.lng
+		}
+	};
     var orderCount = 0;
-    dbs["Users"].find({
-        "_id": id
-    }, function(err, res) {
-        currentUser = res[0];
-    });
+	
+	console.log(currentUser);
+    
     dbs["Drivers"].find({}, function(e, r) {
         drivers = r;
         for (var i = 0; i < drivers.length; i++) {
