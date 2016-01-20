@@ -533,19 +533,64 @@ var closestDriversHandler = function(cfg, req, res){
     });
 }
 
-
+/****** NOTE *******
+	How to cancel a timed booking:
+	
+	key = id of booking
+	value = timeout event
+	Thus: search for the value associated with the id in timedBookings,
+	call clearTimeout(value)
+	
+	To clear up the array:
+	
+	var index = timedBookings.indexOf({key:value});
+	if(index > -1){
+	   timedBookings.splice(index, 1);
+	}
+*/
+var timedBookings = [];
 var autoAssignDriver = function(data) {
-    dbs["Bookings"].find({_id: data._id}, fucntion(error, success){
-        if(success[0].time !== undefined){
-            getClosestDriver(data, function(closestDriver, id) {
-                assignNewDriver(closestDriver, id);
-                autoRejectBooking(id, closestDriver, 40*1000);
-            });
-        } else {
-            var timeout = Date.now() - Date.parse(success[0].time);
-            console.log(timeout);
-        }
-    })
+	
+	var awaitID = setInterval(function(){
+		try{
+			if(data._id !== undefined){
+				var bookingId = data._id;
+				clearInterval(awaitID);
+				dbs["Bookings"].find({_id: bookingId}, function(error, success){
+					//console.log(success);
+					if(success[0].time === undefined){
+						getClosestDriver(data, function(closestDriver, id) {
+							assignNewDriver(closestDriver, id);
+							autoRejectBooking(id, closestDriver, 40*1000);
+						});
+					} else {
+						var timeout = success[0].time - Date.now();
+						var timeoutFunc = setTimeout(function(){							
+								dbs["Bookings"].find({_id: bookingId}, function(err, res){
+									if(res[0].status === "Unconfirmed")
+									{
+										console.log("Booking has been assigned");
+										getClosestDriver(data, function(closestDriver, id) {
+											assignNewDriver(closestDriver, id);
+											autoRejectBooking(id, closestDriver, 40*1000);
+										});										
+									}
+									
+								});
+							}, timeout-600000);
+						var item = {bookingId : timeoutFunc};
+						timedBookings.push(item);
+					}
+				});
+        
+			}
+		} catch(ex){
+			//console.log("Timed Out");
+		}
+	}, 100);
+	
+	
+    
     
     return data;
 }
