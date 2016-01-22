@@ -2139,6 +2139,38 @@ dbs["Vehicles"].insert({
     "VRN": "CP 60 YD GP",
     "identifier": "162"
 });
+dbs["Vehicles"].insert({
+    "_id": "TESTV6",
+    "make": "Mercedes",
+    "model": "E350",
+    "year": "2013",
+    "VRN": "CP 60 YD GP",
+    "identifier": "162"
+});
+dbs["Vehicles"].insert({
+    "_id": "TESTV7",
+    "make": "Mercedes",
+    "model": "E350",
+    "year": "2013",
+    "VRN": "CP 60 YD GP",
+    "identifier": "162"
+});
+dbs["Vehicles"].insert({
+    "_id": "TESTV8",
+    "make": "Mercedes",
+    "model": "E350",
+    "year": "2013",
+    "VRN": "CP 60 YD GP",
+    "identifier": "162"
+});
+dbs["Vehicles"].insert({
+    "_id": "TESTV9",
+    "make": "Mercedes",
+    "model": "E350",
+    "year": "2013",
+    "VRN": "CP 60 YD GP",
+    "identifier": "162"
+});
 dbs["Drivers"].insert({
     "_id": "craig@ssa.com",
     "assignedVehicle": "TESTV"
@@ -2166,6 +2198,18 @@ dbs["Drivers"].insert({
 dbs["Drivers"].insert({
     "_id": "driver6@test.com",
     "assignedVehicle": "TESTV6"
+});
+dbs["Drivers"].insert({
+    "_id": "driver7@test.com",
+    "assignedVehicle": "TESTV7"
+});
+dbs["Drivers"].insert({
+    "_id": "driver8@test.com",
+    "assignedVehicle": "TESTV8"
+});
+dbs["Drivers"].insert({
+    "_id": "driver96@test.com",
+    "assignedVehicle": "TESTV9"
 });
 
 dbs["Users"].insert({
@@ -2394,6 +2438,94 @@ dbs["UserInfo"].insert({
     "firstName": "John",
     "lastName": "Smith",
     "mobileNumber": "084 523 8884",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+})
+
+dbs["Users"].insert({
+    "_id": "driver6@test.com",
+    "password": "1",
+    "userType": "service",
+    "location": {
+        "lat": "-26.0753",
+        "lng": "28.0798",
+        "bearing": "315"
+    },
+    "businessId": "serv30@ssa.co.za",
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "driver6@test.com",
+    "firstName": "Jacob",
+    "lastName": "Zebra",
+    "mobileNumber": "084 524 8884",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+})
+
+dbs["Users"].insert({
+    "_id": "driver7@test.com",
+    "password": "1",
+    "userType": "service",
+    "location": {
+        "lat": "-26.0818",
+        "lng": "28.1179",
+        "bearing": "90"
+    },
+    "businessId": "serv30@ssa.co.za",
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "driver7@test.com",
+    "firstName": "James",
+    "lastName": "Malema",
+    "mobileNumber": "084 525 8884",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+})
+
+dbs["Users"].insert({
+    "_id": "driver8@test.com",
+    "password": "1",
+    "userType": "service",
+    "location": {
+        "lat": "-26.8016",
+        "lng": "28.1183",
+        "bearing": "130"
+    },
+    "businessId": "serv30@ssa.co.za",
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "driver8@test.com",
+    "firstName": "Tim",
+    "lastName": "Baslam",
+    "mobileNumber": "084 529 8884",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+})
+
+dbs["Users"].insert({
+    "_id": "driver9@test.com",
+    "password": "1",
+    "userType": "service",
+    "location": {
+        "lat": "26.0976",
+        "lng": "28.0894",
+        "bearing": "240"
+    },
+    "businessId": "serv30@ssa.co.za",
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "driver9@test.com",
+    "firstName": "Tack",
+    "lastName": "Sea",
+    "mobileNumber": "084 525 8884",
     "addresses": [],
     "avatarDocId": "null",
     "lastModified": Date.now()
@@ -2698,7 +2830,7 @@ dbs["CheckListResult"].insert({
 dbs["CheckListResult"].insert({
     "_id": "4",
     "templateId": "TUTA",
-    "result": "Are any of your tires flat or do any of them have visual damages?",
+    "result": "Are any of your tires flat?",
     "date": Date.now(),
     "lastModified": Date.now()
 });
