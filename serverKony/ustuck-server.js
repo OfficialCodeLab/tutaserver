@@ -439,8 +439,6 @@ var closestDriversHandler = function(cfg, req, res, lat, lng){
 		}
 	};
     var orderCount = 0;
-	
-	console.log(currentUser);
     
     dbs["Drivers"].find({}, function(e, r) {
         drivers = r;
@@ -1984,6 +1982,31 @@ dbs["Users"].insert({
 });
 dbs["UserInfo"].insert({
     "_id": "craig@ssa.com",
+    "firstName": "Craig",
+    "lastName": "Haworth",
+    "mobileNumber": "072 012 1187",
+    "addresses": [{
+        "description": "Home",
+        "street": "8 Frere Street",
+        "suburb": "Kensington B",
+        "province": "Gauteng"
+    }],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+});
+
+dbs["Users"].insert({
+    "_id": "craig2@ssa.com",
+    "password": "1",
+    "userType": "private",
+    "location": {
+        "lat": "-26.076",
+        "lng": "28.0008"
+    },
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "craig2@ssa.com",
     "firstName": "Craig",
     "lastName": "Haworth",
     "mobileNumber": "072 012 1187",
