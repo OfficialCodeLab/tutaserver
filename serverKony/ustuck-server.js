@@ -473,12 +473,23 @@ var closestDriversHandler = function(cfg, req, res, lat, lng){
 							//Calculate distance now since driver is available
 							if (user !== null) {
 								var dist = distance(currentUser.location.lat, currentUser.location.lng, user[0].location.lat, user[0].location.lng);
+                                var brng = null;
+                                try{
+                                    brng = user[0].location.bearing;
+                                }
+                                catch(ex){
+
+                                } 
+
+                                if(brng === undefined || brng === null)
+                                    brng = 0;
 								var driverItem = {
 									id: user[0]._id,
 									distance: dist,
 									location: {
 										lat: user[0].location.lat,
-										lng: user[0].location.lng
+    									lng: user[0].location.lng,
+                                        bearing: brng
 									}
 								};
 
@@ -714,15 +725,25 @@ var getClosestDriver = function(data, callback) {
 								//Calculate distance now since driver is available
 								if (user !== null && userId !== null) {
 									var dist = distance(bookedUser.location.lat, bookedUser.location.lng, user[0].location.lat, user[0].location.lng);
-									var driverItem = {
-										id: user[0]._id,
-										distance: dist,
-										location: {
-											lat: user[0].location.lat,
-											lng: user[0].location.lng
-										}
-									};
+									var brng = null;
+                                    try{
+                                        brng = user[0].location.bearing;
+                                    }
+                                    catch(ex){
 
+                                    } 
+                                    
+                                    if(brng === undefined || brng === null)
+                                        brng = 0;
+                                    var driverItem = {
+                                        id: user[0]._id,
+                                        distance: dist,
+                                        location: {
+                                            lat: user[0].location.lat,
+                                            lng: user[0].location.lng,
+                                            bearing: brng
+                                        }
+                                    };
 									//Sort the item into the array of ordered drivers (5 max)
 									if (driversOrdered.length === 0)
 									{
@@ -1781,15 +1802,22 @@ var uStuckModel = {
             },
         },
         "DriverDistanceType" : {
-        	"id": "Edm.String",
-            "distance": "Edm.String",
+        	"id": {
+                "type": "Edm.String" 
+            },
+            "distance": {
+                "type":"Edm.String" 
+            },
             "location": {
                 "lat": {
-                "type": "Edm.String"
+                    "type": "Edm.String"
 		        },
 		        "lng": {
 		            "type": "Edm.String"
 		        },
+                "bearing": {
+                    "type":"Edm.String"
+                }
             }
         }
     },
