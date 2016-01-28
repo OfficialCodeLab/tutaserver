@@ -8,6 +8,10 @@ var db = new Datastore({
 });
 var dbs = {};
 
+//KM (x metres) * HOURS (x mins)
+var GLOBAL_MAX_COST = 200*1000*120*60;
+
+
 var gcm = require('node-gcm');
 var apn = require('apn');
 
@@ -464,7 +468,7 @@ var closestDriversHandler = function(cfg, req, res, lat, lng){
 							}
 						}*/
 
-						if (driverIsAvailable) {
+						if (driverIsAvailable && result[0]._id !== id) {
 
 							/* Search for rejected booking in driver list */
 							var user = null;
@@ -631,6 +635,9 @@ var orderMatrix = function(data, driversOrdered, bookedUser, callback){
 	var distanceCounter = 0;
 	var assigned = false;
 
+    if(driversOrdered.length == 0)
+       callback(null, data._id);
+
 	for (var z = 0; z < driversOrdered.length; z++) {
 
 		var origin = [{
@@ -656,7 +663,10 @@ var orderMatrix = function(data, driversOrdered, bookedUser, callback){
 			if (distanceCounter >= driversOrdered.length - 1 && assigned === false) {
 				assigned = true;
 				//Callback with all relevant data
-				callback(closestDriver, data._id);
+                if(shortestRoute < GLOBAL_MAX_COST)
+				    callback(closestDriver, data._id);
+                else                    
+                    callback(null, data._id);
 			}
 		}, z);
 
@@ -697,7 +707,7 @@ var getClosestDriver = function(data, callback) {
 							}
 						}
 
-						if (driverIsAvailable) {
+						if (driverIsAvailable && result[0]._id !== data._id) {
 
 							/* Search for rejected booking in driver list */
 							var user = null;
@@ -820,11 +830,17 @@ var getClosestDriver = function(data, callback) {
 }
 
 var assignNewDriver = function(provider, id) {
+    var newprovider;
+
+    if(provider == null)
+        newprovider = "NODRIVER";
+    else
+        newprovider = provider;
     dbs["Bookings"].update({
         _id: id
     }, {
         $set: {
-            "providerId": provider
+            "providerId": newprovider
         }
     }, function(s, e) {
 		dbs["Bookings"].update({_id: id}, {$set :{status : "Unconfirmed"}}, function(error, result){});
