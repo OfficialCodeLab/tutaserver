@@ -832,19 +832,29 @@ var getClosestDriver = function(data, callback) {
 var assignNewDriver = function(provider, id) {
     var newprovider;
 
-    if(provider == null)
-        newprovider = "NODRIVER";
-    else
-        newprovider = provider;
-    dbs["Bookings"].update({
-        _id: id
-    }, {
-        $set: {
-            "providerId": newprovider
-        }
-    }, function(s, e) {
-		dbs["Bookings"].update({_id: id}, {$set :{status : "Unconfirmed"}}, function(error, result){});
-    });
+    if(provider == null){
+        dbs["Bookings"].update({
+            _id: id
+        }, {
+            $set: {
+                "providerId": "NODRIVER"
+            }
+        }, function(s, e) {
+            dbs["Bookings"].update({_id: id}, {$set :{status : "Cancelled"}}, function(error, result){});
+        });
+    }
+    else{
+        dbs["Bookings"].update({
+            _id: id
+        }, {
+            $set: {
+                "providerId": provider
+            }
+        }, function(s, e) {
+            dbs["Bookings"].update({_id: id}, {$set :{status : "Unconfirmed"}}, function(error, result){});
+        });
+    }
+    
 }
 
 
@@ -1251,11 +1261,15 @@ var averageRatingHandler = function(cfg, req, res) {
     });
 }
 
+var providerEmails = [
+{"TUTA" : "courtney@codelab.io"}
+];
 var logIssueHandler = function(data) {
     //TODO: Send email to provider
 
+    var to = providerEmails[data.providerId];
     var mail = {
-        to: data.providerId,
+        to: to,
         subject: data.queryTopic,
         text: data.queryFull
     };
