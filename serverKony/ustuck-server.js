@@ -80,11 +80,17 @@ var userQueryHandler = function(result) {
  * @param entity The entity that was updated
  **/
 var statusTrackHandler = function(cfg, req, entity) {
-
+    
     // find object before update
     // clean up id
-    var id = req.params.id.replace(/\"/g, "").replace(/'/g, "");
+	
+	
 
+		
+    var id = req.params.id.replace(/\"/g, "").replace(/'/g, "");
+	try{
+		console.log("User location updated (" + id + ") : " + entity.location.lat + " , " + entity.location.lng +"\n Timestamp : " + getTimeStamp(Date.now()));		
+	} catch(ex){}
     dbs[req.params.collection].find({
         "_id": id
     }, function(err, result) {
@@ -92,7 +98,8 @@ var statusTrackHandler = function(cfg, req, entity) {
 
         } else {
             if (result.length > 0) {
-                if (result[0].status != entity.status) {
+                if (result[0].status != entity.status && entity.status !== undefined) {
+					console.log("Status changed (" + id + ") : " + result[0].status + " -> " + entity.status +"\n Timestamp : " + getTimeStamp(Date.now()));
                     // track change
                     var statusChange = {
                         "userId": id,
@@ -101,7 +108,6 @@ var statusTrackHandler = function(cfg, req, entity) {
                         "location": entity.location,
                         "lastModified": Date.now()
                     }
-
                     dbs["StatusTracking"].insert(statusChange, function(err, res) {
 
                     });
@@ -593,6 +599,7 @@ var autoAssignDriver = function(data) {
 					//console.log(success);
 					if(success[0].time === undefined){
 						getClosestDriver(data, function(closestDriver, id) {
+							console.log("Closest driver: " + closestDriver);
 							assignNewDriver(closestDriver, id);
 							autoRejectBooking(id, closestDriver, 40*1000);
 						});
@@ -634,6 +641,7 @@ var orderMatrix = function(data, driversOrdered, bookedUser, callback){
 	var shortestRoute = Number.MAX_VALUE;
 	var distanceCounter = 0;
 	var assigned = false;
+	console.log("Drivers ordered by straight line (ID: " + data._id + ") : " + JSON.stringify(driversOrdered));
 
     if(driversOrdered.length == 0)
        callback(null, data._id);
@@ -2003,6 +2011,21 @@ var uStuckModel = {
 
     }
 };
+var getTimeStamp = function(time){
+	var dateObj = new Date(time)
+	var hour = dateObj.getHours();
+	var min = dateObj.getMinutes();
+	var sec = dateObj.getSeconds();
+	var ampm = "AM";
+
+	// Format date elements
+	if (hour > 12) { hour = hour - 12; ampm = "PM"; }
+	if (hour < 10) { hour = '0' + hour; }
+	if (min < 10) { min = '0' + min; }
+	if (sec < 10) { sec = '0' + sec; }
+	
+	return hour + ":" + min  + ":" + sec + " " + ampm;
+}
 
 
 /*
@@ -2201,6 +2224,24 @@ dbs["Vehicles"].insert({
     "VRN": "CP 60 YD GP",
     "identifier": "162"
 });
+
+dbs["Vehicles"].insert({
+    "_id": "MOZI1",
+    "make": "Mercedes",
+    "model": "E350",
+    "year": "2013",
+    "VRN": "CP 60 YD GP",
+    "identifier": "16414"
+});
+
+dbs["Vehicles"].insert({
+    "_id": "MOZI2",
+    "make": "Mercedes",
+    "model": "E350",
+    "year": "2013",
+    "VRN": "CP 60 YD GP",
+    "identifier": "16424"
+});
 dbs["Drivers"].insert({
     "_id": "craig@ssa.com",
     "assignedVehicle": "TESTV"
@@ -2242,6 +2283,34 @@ dbs["Drivers"].insert({
     "assignedVehicle": "TESTV9"
 });
 
+dbs["Drivers"].insert({
+    "_id": "mozziedriver",
+    "assignedVehicle": "MOZI1"
+});
+
+dbs["Drivers"].insert({
+    "_id": "peterl@mozzie.co.za",
+    "assignedVehicle": "MOZI2"
+});
+
+dbs["Users"].insert({
+    "_id": "jarred@ssa.co.za",
+    "password": "1",
+    "location": {
+        "lat": "-26.065",
+        "lng": "28.0026"
+    },
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "jarred@ssa.co.za",
+    "firstName": "Jarred",
+    "lastName": "Cowley",
+    "mobileNumber": "083 323 2154",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+})
 dbs["Users"].insert({
     "_id": "serv1@ssa.co.za",
     "password": "1",
@@ -2556,6 +2625,51 @@ dbs["UserInfo"].insert({
     "firstName": "Tack",
     "lastName": "Sea",
     "mobileNumber": "084 525 8884",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+});
+
+dbs["Users"].insert({
+    "_id": "mozziedriver",
+    "password": "1",
+    "userType": "service",
+    "location": {
+        "lat": "26.0976",
+        "lng": "28.0894",
+        "bearing": "240"
+    },
+    "businessId": "serv30@ssa.co.za",
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "mozziedriver",
+    "firstName": "Mozzie",
+    "lastName": "Cabs",
+    "mobileNumber": "084 525 8412",
+    "addresses": [],
+    "avatarDocId": "null",
+    "lastModified": Date.now()
+})
+
+
+dbs["Users"].insert({
+    "_id": "peterl@mozzie.co.za",
+    "password": "1",
+    "userType": "service",
+    "location": {
+        "lat": "26.0976",
+        "lng": "28.0894",
+        "bearing": "240"
+    },
+    "businessId": "serv30@ssa.co.za",
+    "lastModified": Date.now()
+});
+dbs["UserInfo"].insert({
+    "_id": "peterl@mozzie.co.za",
+    "firstName": "Peter",
+    "lastName": "L",
+    "mobileNumber": "084 525 4124",
     "addresses": [],
     "avatarDocId": "null",
     "lastModified": Date.now()
