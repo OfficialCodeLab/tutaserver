@@ -1558,6 +1558,9 @@ var uStuckModel = {
             "providerId": {
                 "type": "Edm.String"
             },
+			"serviceProviderId" : {
+				"type": "Edm.String"
+			},
             "time": {
                 "type": "Edm.String"
             },
@@ -1582,6 +1585,9 @@ var uStuckModel = {
                 "type": "Edm.String",
                 key: true
             },
+			"serviceProviderId" : {
+				"type": "Edm.String"
+			},
             "color": {
                 "type": "Edm.String"
             },
@@ -1674,6 +1680,58 @@ var uStuckModel = {
             },
             "message": {
                 "type": "ustuck.MessageType"
+            }
+        },
+		"OperationalZoneType": {
+            "_id": {
+                "type": "Edm.String",
+                key: true
+            },
+			"serviceProviderId":{
+                "type": "Edm.String"
+            },
+            "centre": {
+                "type": "ustuck.Location"
+            },
+            "radius": {
+                "type": "Edm.Integer"
+            },
+			"minimumDispatchInterval": {
+                "type": "Edm.Integer"
+            },
+			"userCount": {
+                "type": "Edm.Integer"
+            }
+			
+        },
+		"CapacityType": {
+            "_id": {
+                "type": "Edm.String",
+                key: true
+            },
+			"operationalZoneId":{
+                "type": "Edm.String"
+            },
+            "hour": {
+                "type": "Edm.Integer"
+            },
+            "day": {
+                "type": "Edm.Integer"
+            },
+			"week": {
+                "type": "Edm.Integer"
+            },
+			"maxCapacity": {
+                "type": "Edm.Integer"
+            }
+        },
+		"CapabilityType": {
+            "_id": {
+                "type": "Edm.String",
+                key: true
+            },
+			"tags":{
+                "type": "Edm.String"
             }
         },
         "ConfigType": {
@@ -1927,6 +1985,20 @@ var uStuckModel = {
                 }
             }
         },
+		"OperationalZones": {
+            entityType: "ustuck.OperationalZoneType",
+            associations: {
+                Capacity: {
+                    field: "capacity",
+                    from: "OperationalZones._id",
+                    to: "Capacity.operationalZoneId",
+                    multiplicity: "1:n"
+                }
+            }
+        },
+		"Capacity": {
+            entityType: "ustuck.CapacityType"
+        },
         "Services": {
             entityType: "ustuck.ServiceType"
         },
@@ -1955,6 +2027,20 @@ var uStuckModel = {
                 "accept": acceptBookingHandler,
                 "reject": rejectBookingHandler,
                 "track": trackBookingHandler
+            },
+			associations: {
+                User: {
+                    field: "user",
+                    from: "Bookings.userId",
+                    to: "Users._id",
+                    multiplicity: "1:1"
+                },
+				UserInfo: {
+                    field: "userInfo",
+                    from: "Bookings.userId",
+                    to: "UserInfo._id",
+                    multiplicity: "1:1"
+                }
             }
         },
         "Routes": {
@@ -2050,6 +2136,44 @@ var odataServer = require("simple-odata-server")(config.server.url(config.server
 
 
 http.createServer(odataServer.handle.bind(odataServer)).listen(config.server.port);
+
+/*
+	create test operational zone
+*/
+dbs["ServiceProviders"].insert({
+    "_id": "peterl@mozzie.co.za",
+    "companyName": "Mozzie Cabs",
+    "hours": "9am - 5pm : mon-fri",
+    "offering": "Taxi Services in the Durban Area",
+    "yearsInBusiness": "20 years",
+    "rate": "R12.50 / km",
+    "serviceTypeId": "100",
+    "certificationDocId": "",
+    "location": {
+        "lat": "-26.2044",
+        "lng": "28.0027"
+    }
+});
+
+dbs["OperationalZones"].insert({
+	"operationalZoneId": "mozzieZone1",
+	"serviceProviderId": "peterl@mozzie.co.za",
+	"centre" : {
+		"lat" : "-26.076",
+		"lng" : "28.0008"
+	},
+	"radius" : 20000,
+	"userCount" : 45,
+	"minimumDispatchInterval" : 20
+});
+
+dbs["Capacity"].insert({
+	"operationalZoneId": "mozzieZone1",
+	"maxCapacity": 30,
+	"hour" : -1,
+	"day" : -1,
+	"week" : -1
+});
 
 dbs["Users"].insert({
     "_id": "craig@ssa.com",
